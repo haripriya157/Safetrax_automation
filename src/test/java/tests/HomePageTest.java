@@ -30,6 +30,7 @@ public class HomePageTest {
         assert driver.getCurrentUrl().contains("dev171.safetrax.in");
         homePage.signIn(creds.getString("username"), creds.getString("password"));
         String errorMsg = homePage.getErrorMessage();
+
         Assert.assertEquals(errorMsg, "Either username or password is wrong");
     }
 
