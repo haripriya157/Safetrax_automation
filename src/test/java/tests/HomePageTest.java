@@ -18,8 +18,6 @@ public class HomePageTest {
     @BeforeClass
     public void setUp() {
         ChromeOptions options = new ChromeOptions();
-        // Ensure headless is NOT set
-        // options.addArguments("--headless"); // REMOVE or comment out this line if present
         driver = new ChromeDriver(options);
         driver.manage().window().maximize(); // Maximize window to see UI
         homePage = new HomePage(driver);
@@ -50,7 +48,7 @@ public class HomePageTest {
     }
     public void waitFor5seconds(){
         try {
-            Thread.sleep(5000); // This is not recommended for production code, use WebDriverWait instead
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
