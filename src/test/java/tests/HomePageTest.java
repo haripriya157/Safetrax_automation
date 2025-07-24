@@ -56,6 +56,7 @@ public class HomePageTest {
         assert driver.getCurrentUrl().contains("http://10.10.100.171:3004/auth?redirectTo=/");
         homePage.clickForgotPassword();
         assert driver.getCurrentUrl().contains("auth/resetpassword");
+
     }
 
     @Test(priority = 3)
