@@ -4,13 +4,14 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
 public class HomePage {
     private WebDriver driver;
-    private String url = "https://dev171.safetrax.in";
+    private String url = "http://10.10.100.171:3004/";
 
     public HomePage(WebDriver driver) {
         this.driver = driver;
@@ -18,22 +19,33 @@ public class HomePage {
 
     public void navigateToHomePage() {
         driver.get(url);
-        // Wait for up to 10 seconds for the page URL to match
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(
-            (ExpectedCondition<Boolean>) d -> d.getCurrentUrl().contains("dev171.safetrax.in")
+            d -> d.getCurrentUrl().contains("http://10.10.100.171:3004/")
         );
-
+        // Wait for username field to be visible
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(
+            ExpectedConditions.visibilityOfElementLocated(By.id("user"))
+        );
     }
+
     public void enterUsername(String username) {
-        driver.findElement(By.id("user")).sendKeys(username);
+        WebElement userField = new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.visibilityOfElementLocated(By.id("user")));
+        userField.clear();
+        userField.sendKeys(username);
     }
 
     public void enterPassword(String password) {
-        driver.findElement(By.id("password")).sendKeys(password);
+        WebElement passField = new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.visibilityOfElementLocated(By.id("password")));
+        passField.clear();
+        passField.sendKeys(password);
     }
 
     public void clickSubmit() {
-        driver.findElement(By.id("formsubmit")).click();
+        WebElement submitBtn = new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.elementToBeClickable(By.id("formsubmit")));
+        submitBtn.click();
     }
 
     public void signIn(String username, String password) {
@@ -42,15 +54,42 @@ public class HomePage {
         clickSubmit();
     }
 
-    // In HomePage.java
     public void logout() {
-        driver.findElement(By.xpath("//div[@class='cookie-user-id user-id-new-ui']")).click();
-        driver.findElement(By.id("gotologout")).click();
+        // Wait for user icon to be clickable
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='cookie-user-id user-id-new-ui']")))
+            .click();
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.elementToBeClickable(By.id("gotologout")))
+            .click();
     }
 
-    // Add this method to get error message after failed login
     public String getErrorMessage() {
-        WebElement errorMsg = driver.findElement(By.xpath("//*[text()='Either username or password is wrong  ']")); // Change selector if needed
-        return errorMsg.getText();
+        // Wait for error message to be visible
+        WebElement errorMsg = new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(),'Either username or password is wrong')]")));
+        return errorMsg.getText().trim();
+    }
+
+    public void clickForgotPassword() {
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='forgot']/a[@href='/auth/resetpassword']")))
+            .click();
+    }
+    public void resetPassword(String username) {
+        WebElement usernameInput = new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@id='user']")));
+        usernameInput.clear();
+        usernameInput.sendKeys(username);
+        // Update selector for reset password button (use actual id or text)
+        WebElement resetBtn = new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(text(),'RESET PASSWORD')]")));
+        resetBtn.click();
+    }
+
+    public String getResetPasswordMessage() {
+        WebElement msg = new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id='infoMessage']")));
+        return msg.getText();
     }
 }

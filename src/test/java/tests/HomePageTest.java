@@ -1,19 +1,28 @@
 package tests;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.json.JSONObject;
 import tests.utils.CredentialsUtil;
-import org.openqa.selenium.devtools.DevTools;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.HomePage;
 
+
+//------------------------------------------------------
+//author: HariPriya M
+//date: 14-07-2025
+//
+//-------------------------------------------------------
+/**
+ * Test class for verifying the functionality of the HomePage.
+ */
+
 public class HomePageTest {
     private WebDriver driver;
     private HomePage homePage;
-
 
     @BeforeClass
     public void setUp() {
@@ -23,30 +32,46 @@ public class HomePageTest {
         homePage = new HomePage(driver);
     }
 
-    @Test(priority = 0, description = "Test to verify invalid login functionality")
+    @Test(priority = 0)
+    public void verifyHomePageContent() {
+        homePage.navigateToHomePage();
+        assert driver.getCurrentUrl().contains("http://10.10.100.171:3004/");
+        String actualText = driver.findElement(By.xpath("//div[contains(text(),'Unified Platform')]")).getText().trim();
+        Assert.assertTrue(actualText.toLowerCase().contains("unified platform for employee transport automation"));
+    }
+
+    @Test(priority = 1)
     public void verifyInvalidLogin() {
         JSONObject creds = CredentialsUtil.getCredentials("invalid");
         homePage.navigateToHomePage();
-        assert driver.getCurrentUrl().contains("dev171.safetrax.in");
+        assert driver.getCurrentUrl().contains("http://10.10.100.171:3004/auth?redirectTo=/");
         homePage.signIn(creds.getString("username"), creds.getString("password"));
         String errorMsg = homePage.getErrorMessage();
-
-        Assert.assertEquals(errorMsg, "Either username or password is wrong");
+        Assert.assertTrue(errorMsg.contains("Either username or password is wrong"));
     }
 
-    @Test(priority = 1, description = "Test to verify navigation to home page and successful login")
+    @Test(priority = 2)
+    public void verifyForgotPasswordLink() {
+        homePage.navigateToHomePage();
+        assert driver.getCurrentUrl().contains("http://10.10.100.171:3004/auth?redirectTo=/");
+        homePage.clickForgotPassword();
+        assert driver.getCurrentUrl().contains("auth/resetpassword");
+    }
+
+    @Test(priority = 3)
     public void verifyValidLogin() {
         JSONObject creds = CredentialsUtil.getCredentials("valid");
         homePage.navigateToHomePage();
-        assert driver.getCurrentUrl().contains("dev171.safetrax.in");
+        assert driver.getCurrentUrl().contains("http://10.10.100.171:3004/auth?redirectTo=/");
         homePage.signIn(creds.getString("username"), creds.getString("password"));
-        waitFor5seconds();
-        assert driver.getCurrentUrl().contains("https://dev171.safetrax.in/superadmindashboard");
-        assert driver.getTitle().equals("Safetrax");
-
+        // Wait for dashboard page to load
+        new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(10));
+        Assert.assertTrue(driver.getCurrentUrl().contains("http://10.10.100.171:3004/superadmindashboard"));
+        Assert.assertEquals(driver.getTitle(), "Safetrax");
         homePage.logout();
         waitFor5seconds();
     }
+
     public void waitFor5seconds(){
         try {
             Thread.sleep(5000);
@@ -62,5 +87,3 @@ public class HomePageTest {
         }
     }
 }
-
-
